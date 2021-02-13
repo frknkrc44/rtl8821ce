@@ -1260,6 +1260,7 @@ static u8 _rtw_phydm_rfk_condition_check(_adapter *adapter, u8 is_scaning, u8 if
 	return rfk_allowed;
 	#endif
 
+	/*
 	if (ifs_linked) {
 		if (is_scaning) {
 			rfk_allowed = _FALSE;
@@ -1271,6 +1272,7 @@ static u8 _rtw_phydm_rfk_condition_check(_adapter *adapter, u8 is_scaning, u8 if
 				RTW_ERR("[RFK-CHK] RF-K not allowed due to ld_iface not stayin union ch\n");
 		}
 	}
+	*/
 
 	#ifdef CONFIG_MCC_MODE
 	/*not in MCC State*/
