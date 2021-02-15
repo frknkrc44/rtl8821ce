@@ -3567,7 +3567,7 @@ struct xmit_frame *rtw_alloc_xmitframe_ext(struct xmit_priv *pxmitpriv)
 	_queue *queue = &pxmitpriv->free_xframe_ext_queue;
 
 
-	_enter_critical_bh(&queue->lock, &irqL);
+	// _enter_critical_bh(&queue->lock, &irqL);
 
 	if (_rtw_queue_empty(queue) == _TRUE) {
 		pxframe =  NULL;
@@ -3575,12 +3575,11 @@ struct xmit_frame *rtw_alloc_xmitframe_ext(struct xmit_priv *pxmitpriv)
 		phead = get_list_head(queue);
 		plist = get_next(phead);
 		pxframe = LIST_CONTAINOR(plist, struct xmit_frame, list);
-
 		rtw_list_delete(&(pxframe->list));
 		pxmitpriv->free_xframe_ext_cnt--;
 	}
 
-	_exit_critical_bh(&queue->lock, &irqL);
+	// _exit_critical_bh(&queue->lock, &irqL);
 
 	rtw_init_xmitframe(pxframe);
 
