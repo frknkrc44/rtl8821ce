@@ -349,13 +349,16 @@ static int napi_recv(_adapter *padapter, int budget)
 	       (!skb_queue_empty(&precvpriv->rx_napi_skb_queue))) {
 		pskb = skb_dequeue(&precvpriv->rx_napi_skb_queue);
 		if (!pskb)
+			pskb = napi_get_frags(&padapter->napi);
+		
+		if (!pskb)
 			break;
 
 		rx_ok = _FALSE;
 
 #ifdef CONFIG_RTW_GRO
 		if (pregistrypriv->en_gro) {
-			if (rtw_napi_gro_receive(&padapter->napi, pskb) != GRO_DROP)
+			if (rtw_napi_gro_receive(&padapter->napi, pskb) != GRO_MERGED_FREE)
 				rx_ok = _TRUE;
 			goto next;
 		}
