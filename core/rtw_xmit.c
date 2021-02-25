@@ -3310,8 +3310,16 @@ struct xmit_buf *rtw_alloc_xmitbuf_ext(struct xmit_priv *pxmitpriv)
 		rtw_list_delete(&(pxmitbuf->list));
 	}
 
+	sint allocated_after = _FALSE;
+
+	if(pxmitbuf == NULL) {
+		pxmitbuf = (struct xmit_buf*)N_BYTE_ALIGMENT((SIZE_PTR)(pxmitpriv->pallocated_xmitbuf), 4);
+		allocated_after = _TRUE;
+	}
+
 	if (pxmitbuf !=  NULL) {
-		pxmitpriv->free_xmit_extbuf_cnt--;
+		if (allocated_after == _FALSE)
+			pxmitpriv->free_xmit_extbuf_cnt--;
 #ifdef DBG_XMIT_BUF_EXT
 		RTW_INFO("DBG_XMIT_BUF_EXT ALLOC no=%d,  free_xmit_extbuf_cnt=%d\n", pxmitbuf->no, pxmitpriv->free_xmit_extbuf_cnt);
 #endif
@@ -3567,7 +3575,7 @@ struct xmit_frame *rtw_alloc_xmitframe_ext(struct xmit_priv *pxmitpriv)
 	_queue *queue = &pxmitpriv->free_xframe_ext_queue;
 
 
-	// _enter_critical_bh(&queue->lock, &irqL);
+	_enter_critical_bh(&queue->lock, &irqL);
 
 	if (_rtw_queue_empty(queue) == _TRUE) {
 		pxframe =  NULL;
@@ -3579,7 +3587,7 @@ struct xmit_frame *rtw_alloc_xmitframe_ext(struct xmit_priv *pxmitpriv)
 		pxmitpriv->free_xframe_ext_cnt--;
 	}
 
-	// _exit_critical_bh(&queue->lock, &irqL);
+	_exit_critical_bh(&queue->lock, &irqL);
 
 	rtw_init_xmitframe(pxframe);
 
