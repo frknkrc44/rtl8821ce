@@ -117,10 +117,25 @@ static u8 *get_txbd(_adapter *padapter, u8 q_idx)
 
 	/* DO NOT use last entry. */
 	/* (len -1) to avoid wrap around overlap problem in cycler queue. */
+/*
 	if (ring->qlen == (ring->entries - 1)) {
 		RTW_INFO("No more TX desc@%d, ring->idx = %d,idx = %d\n",
 			 q_idx, ring->idx, idx);
 		return NULL;
+	}
+*/
+
+	// No, I want to use this
+	if (ring->qlen == (ring->entries - 1)) {
+		RTW_INFO("No more TX desc@%d, ring->idx = %d,idx = %d\n",
+			 q_idx, ring->idx, idx);
+		if((ring->qlen - 1) >= 0) {
+			ring->qlen = ring->qlen - 1;
+			RTW_INFO("ring->qlen decreased, now %d\n", ring->qlen);
+		} else {
+			RTW_INFO("TX desc fix FAILED, try to turn off and on\n");
+			return NULL;
+		}
 	}
 
 	if (q_idx == BCN_QUEUE_INX)

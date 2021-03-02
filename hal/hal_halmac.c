@@ -3586,6 +3586,7 @@ int rtw_halmac_txfifo_wait_empty(struct dvobj_priv *d, u32 timeout)
 	u32 cnt = 0;
 	systime start_time = 0;
 	u32 pass_time; /* ms */
+	int ret = -1;
 
 
 	a = dvobj_get_primary_adapter(d);
@@ -3627,8 +3628,7 @@ int rtw_halmac_txfifo_wait_empty(struct dvobj_priv *d, u32 timeout)
 
 		RTW_ERR("%s: Fail to wait txfifo empty!(cnt=%d)\n",
 			__FUNCTION__, cnt);
-		
-		int ret = -1;
+
 		ret = rtw_halmac_poweroff(d);
 		RTW_INFO("Trying to recover STEP1: %s", ret != 0 ? "FAIL" : "SUCCESS");
 		ret = rtw_halmac_poweron(d);

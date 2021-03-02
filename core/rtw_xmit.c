@@ -3293,6 +3293,7 @@ struct xmit_buf *rtw_alloc_xmitbuf_ext(struct xmit_priv *pxmitpriv)
 	struct xmit_buf *pxmitbuf =  NULL;
 	_list *plist, *phead;
 	_queue *pfree_queue = &pxmitpriv->free_xmit_extbuf_queue;
+	int allocated_after = _FALSE;
 
 
 	_enter_critical(&pfree_queue->lock, &irqL);
@@ -3309,8 +3310,6 @@ struct xmit_buf *rtw_alloc_xmitbuf_ext(struct xmit_priv *pxmitpriv)
 
 		rtw_list_delete(&(pxmitbuf->list));
 	}
-
-	sint allocated_after = _FALSE;
 
 	if(pxmitbuf == NULL) {
 		pxmitbuf = (struct xmit_buf*)N_BYTE_ALIGMENT((SIZE_PTR)(pxmitpriv->pallocated_xmitbuf), 4);
