@@ -112,6 +112,7 @@ static u8 *get_txbd(_adapter *padapter, u8 q_idx)
 	struct rtw_tx_ring *ring;
 	u8 *ptxbd = NULL;
 	int idx = 0;
+	int decrease = _FALSE;
 
 	ring = &pxmitpriv->tx_ring[q_idx];
 
@@ -130,8 +131,8 @@ static u8 *get_txbd(_adapter *padapter, u8 q_idx)
 		RTW_INFO("No more TX desc@%d, ring->idx = %d,idx = %d\n",
 			 q_idx, ring->idx, idx);
 		if((ring->qlen - 1) >= 0) {
-			ring->qlen = ring->qlen - 1;
-			RTW_INFO("ring->qlen decreased, now %d\n", ring->qlen);
+			decrease = _TRUE;
+			RTW_INFO("ring->qlen decreased\n");
 		} else {
 			RTW_INFO("TX desc fix FAILED, try to turn off and on\n");
 			return NULL;
@@ -140,8 +141,9 @@ static u8 *get_txbd(_adapter *padapter, u8 q_idx)
 
 	if (q_idx == BCN_QUEUE_INX)
 		idx = 0;
-	else
-		idx = (ring->idx + ring->qlen) % ring->entries;
+	else {
+		idx = (ring->idx + (ring->qlen - (decrease == _TRUE ? 1 : 0))) % ring->entries;
+	}
 
 	ptxbd = (u8 *)&ring->buf_desc[idx];
 
