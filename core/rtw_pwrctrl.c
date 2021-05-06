@@ -258,7 +258,9 @@ bool rtw_pwr_unassociated_idle(_adapter *adapter)
 		RTW_PRINT("There are some pkts to transmit\n");
 		RTW_PRINT("free_xmitbuf_cnt: %d, free_xmit_extbuf_cnt: %d\n",
 			pxmit_priv->free_xmitbuf_cnt, pxmit_priv->free_xmit_extbuf_cnt);
-		goto exit;
+		pxmit_priv->free_xmitbuf_cnt = NR_XMITBUFF;
+		pxmit_priv->free_xmit_extbuf_cnt = NR_XMIT_EXTBUFF;
+		// goto exit;
 	}
 
 	ret = _TRUE;

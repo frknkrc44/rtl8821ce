@@ -63,6 +63,7 @@ mac_pwr_switch_pcie_8821c(struct halmac_adapter *adapter,
 	}
 
 	value8 = HALMAC_REG_R8(REG_CR);
+	PLTFM_MSG_WARN("PCIe status=0x%02x", value8);
 	if (value8 == 0xEA)
 		adapter->halmac_state.mac_pwr = HALMAC_MAC_POWER_OFF;
 	else
@@ -72,7 +73,7 @@ mac_pwr_switch_pcie_8821c(struct halmac_adapter *adapter,
 	if (pwr == HALMAC_MAC_POWER_ON &&
 	    adapter->halmac_state.mac_pwr == HALMAC_MAC_POWER_ON) {
 		PLTFM_MSG_WARN("[WARN]power state unchange!!\n");
-		return HALMAC_RET_PWR_UNCHANGE;
+		// return HALMAC_RET_PWR_UNCHANGE;
 	}
 
 	if (pwr == HALMAC_MAC_POWER_OFF) {

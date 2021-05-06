@@ -3204,8 +3204,9 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 		RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
 			__FUNCTION__, status);
 		_debug_dlfw_fail(d);
-		err = -1;
-		goto resume_tx;
+		// err = -1;
+		err = 0;
+		// goto resume_tx;
 	}
 
 	/* 5.1. (Driver) Reset driver variables if needed */
