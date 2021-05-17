@@ -2900,7 +2900,7 @@ static int _send_general_info(struct dvobj_priv *d)
 	case HALMAC_RET_NO_DLFW:
 		RTW_WARN("%s: halmac_send_general_info() fail because fw not dl!\n",
 			 __FUNCTION__);
-		__attribute__((__fallthrough__));
+		// __attribute__((__fallthrough__));
 	default:
 		return -1;
 	}
@@ -3161,7 +3161,7 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	struct halmac_api *api;
 	struct halmac_fw_version fw_vesion;
 	enum halmac_ret_status status;
-	int err = 0;
+	int err = 0, ret = 0;
 
 
 	hal = GET_HAL_DATA(dvobj_get_primary_adapter(d));
@@ -3204,9 +3204,14 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 		RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
 			__FUNCTION__, status);
 		_debug_dlfw_fail(d);
-		// err = -1;
-		err = 0;
-		// goto resume_tx;
+		ret = rtw_halmac_poweroff(d);
+		RTW_INFO("Trying to recover STEP1: %s", ret != 0 ? "FAIL" : "SUCCESS");
+		ret = rtw_halmac_poweron(d);
+		RTW_INFO("Trying to recover STEP2: %s", ret != 0 ? "FAIL" : "SUCCESS");
+		if(ret != 0) {
+			err = -1;
+			goto resume_tx;
+		}
 	}
 
 	/* 5.1. (Driver) Reset driver variables if needed */
