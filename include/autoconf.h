@@ -60,11 +60,13 @@
 #define USING_RX_TAG
 /*#define CONFIG_64BIT_DMA*/	/* Enable PCI 64bit DMA */
 
+/*
 #define CONFIG_EMBEDDED_FWIMG
 
 #ifdef CONFIG_EMBEDDED_FWIMG
 	#define	LOAD_FW_HEADER_FROM_DRIVER
 #endif
+*/
 /*#define CONFIG_FILE_FWIMG*/
 
 #define CONFIG_XMIT_ACK

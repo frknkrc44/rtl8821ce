@@ -417,6 +417,7 @@ static void rtl8821ce_cmd_handler(PADAPTER Adapter, u32 handled[])
 
 static s32 rtl8821ce_interrupt(PADAPTER Adapter)
 {
+
 	_irqL irqL;
 	HAL_DATA_TYPE *pHalData = GET_HAL_DATA(Adapter);
 	struct dvobj_priv *pdvobjpriv = adapter_to_dvobj(Adapter);
@@ -426,23 +427,23 @@ static s32 rtl8821ce_interrupt(PADAPTER Adapter)
 
 	_enter_critical(&pdvobjpriv->irq_th_lock, &irqL);
 
-	/* read ISR: 4/8bytes */
+	// read ISR: 4/8bytes
 	if (rtl8821ce_InterruptRecognized(Adapter) == _FALSE) {
 		ret = _FAIL;
 		goto done;
 	}
 
-	/* <1> beacon related */
+	// <1> beacon related
 	rtl8821ce_bcn_handler(Adapter, handled);
 
-	/* <2> Rx related */
+	// <2> Rx related
 	rtl8821ce_rx_handler(Adapter, handled);
 
-	/* <3> Tx related */
+	// <3> Tx related
 	rtl8821ce_tx_handler(Adapter, pHalData->IntArray, handled);
 
 	if (pHalData->IntArray[1] & BIT_TXFOVW) {
-		/*if (printk_ratelimit())*/
+		// if (printk_ratelimit())
 		RTW_WARN("[TXFOVW]\n");
 		handled[1] |= BIT_TXFOVW;
 	}
@@ -452,7 +453,7 @@ static s32 rtl8821ce_interrupt(PADAPTER Adapter)
 		handled[1] |= BIT_PRETXERR_HANDLE_ISR;
 	}
 
-	/* <4> Cmd related */
+	// <4> Cmd related
 	rtl8821ce_cmd_handler(Adapter, handled);
 
 #ifdef CONFIG_LPS_LCLK
@@ -465,13 +466,14 @@ static s32 rtl8821ce_interrupt(PADAPTER Adapter)
 #endif
 
 	if ((pHalData->IntArray[0] & (~handled[0])) || (pHalData->IntArray[1] & (~handled[1])) || (pHalData->IntArray[3] & (~handled[3]))) {
-		/*if (printk_ratelimit()) */
+		// if (printk_ratelimit())
 		{
 			RTW_WARN("Unhandled ISR = %x, %x, %x\n",
 				(pHalData->IntArray[0] & (~handled[0])),
 				(pHalData->IntArray[1] & (~handled[1])),
 				(pHalData->IntArray[3] & (~handled[3]))
 			);
+			ret = _SUCCESS;
 		}
 	}
 done:

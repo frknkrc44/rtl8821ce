@@ -15895,7 +15895,8 @@ void rtw_join_done_chk_ch(_adapter *adapter, int join_res)
 
 						rtw_cfg80211_ch_switch_notify(iface
 							, mlmeext->cur_channel, mlmeext->cur_bwmode, mlmeext->cur_ch_offset
-							, ht_option);
+							, ht_option
+							, 0);
 						#endif
 					}
 				}
@@ -16099,6 +16100,9 @@ exit:
 		*ch = u_ch;
 		*bw = u_bw;
 		*offset = u_offset;
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0))
+		rtw_cfg80211_ch_switch_notify(adapter, u_ch, u_bw, u_offset, adapter->mlmepriv.htpriv.ht_option, 1);
+#endif
 	}
 
 	return connect_allow == _TRUE ? _SUCCESS : _FAIL;

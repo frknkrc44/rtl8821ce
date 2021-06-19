@@ -155,7 +155,7 @@ void *_rtw_malloc(u32 sz)
 	else
 #endif
 		// pbuf = kmalloc(sz, in_interrupt() ? GFP_ATOMIC : GFP_KERNEL);
-		pbuf = kvmalloc(sz, GFP_ATOMIC | __GFP_NOFAIL);
+		pbuf = kvmalloc(sz, (in_interrupt() ? GFP_ATOMIC : GFP_KERNEL) | __GFP_NOFAIL);
 #endif
 #ifdef PLATFORM_FREEBSD
 	pbuf = malloc(sz, M_DEVBUF, M_NOWAIT);
