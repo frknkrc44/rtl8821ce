@@ -15,5 +15,25 @@
 #ifndef __DRV_TYPES_LINUX_H__
 #define __DRV_TYPES_LINUX_H__
 
+#include <linux/version.h>
+#include <linux/kthread.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
+    #ifdef set_kthread_struct
+        #undef set_kthread_struct
+    #endif
+
+    #undef kthread_run
+	#define kthread_run(threadfn, data, namefmt, ...)			   \
+({									   \
+	struct task_struct *__k						   \
+		= kthread_create(threadfn, data, namefmt, ## __VA_ARGS__); \
+	if (!IS_ERR(__k)) {						   \
+		set_kthread_struct(__k);				\
+		wake_up_process(__k);				   \
+	}											\
+	__k;								   \
+})
+#endif
 
 #endif

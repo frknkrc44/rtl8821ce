@@ -401,7 +401,7 @@ dbi_r32_88xx(struct halmac_adapter *adapter, u16 addr)
 	HALMAC_REG_W8(REG_DBI_FLAG_V1 + 2, 0x2);
 	tmp_u1b = HALMAC_REG_R8(REG_DBI_FLAG_V1 + 2);
 
-	cnt = 20;
+	cnt = 100;
 	while (tmp_u1b && (cnt != 0)) {
 		PLTFM_DELAY_US(10);
 		tmp_u1b = HALMAC_REG_R8(REG_DBI_FLAG_V1 + 2);
@@ -469,7 +469,7 @@ dbi_r8_88xx(struct halmac_adapter *adapter, u16 addr)
 
 	tmp_u1b = HALMAC_REG_R8(REG_DBI_FLAG_V1 + 2);
 
-	cnt = 20;
+	cnt = 100;
 	while (tmp_u1b && (cnt != 0)) {
 		PLTFM_DELAY_US(10);
 		tmp_u1b = HALMAC_REG_R8(REG_DBI_FLAG_V1 + 2);

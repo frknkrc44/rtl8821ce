@@ -27,6 +27,50 @@
 	#ifndef KERNEL_DS
 		#define KERNEL_DS   MAKE_MM_SEG(-1UL)   // <----- 0xffffffffffffffff
 	#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
+struct kthread {
+	unsigned long flags;
+	unsigned int cpu;
+	int (*threadfn)(void *);
+	void *data;
+	mm_segment_t oldfs;
+	struct completion parked;
+	struct completion exited;
+	struct cgroup_subsys_state *blkcg_css;
+};
+
+	#ifdef __to_kthread
+		#undef __to_kthread
+	#endif
+
+	static inline struct kthread *__to_kthread(struct task_struct *p)
+{
+	int __user *kthread = p->set_child_tid;
+	if (kthread && !(p->flags & PF_KTHREAD))
+		kthread = NULL;
+	return (struct kthread*) kthread;
+}
+
+    #ifdef set_kthread_struct
+        #undef set_kthread_struct
+    #endif
+
+    void set_kthread_struct(struct task_struct *p)
+{
+	struct kthread *kthread;
+
+	if (__to_kthread(p))
+		return;
+
+	kthread = kzalloc(sizeof(*kthread), GFP_KERNEL);
+	
+	if(!(p->flags & PF_KTHREAD))
+		p->flags |= PF_KTHREAD;
+	
+	p->set_child_tid = (int __user *)kthread;
+}
+#endif
 #endif
 
 MODULE_LICENSE("GPL");
@@ -1327,9 +1371,7 @@ unsigned int rtw_classify8021d(struct sk_buff *skb)
 }
 
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0)) || \
-    ( (LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)) && \
-	( defined(RHEL_RELEASE_CODE) || defined(CENTOS_RELEASE_CODE) ) )
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,19,0)) || defined(RHEL_RELEASE_CODE) || defined(CENTOS_RELEASE_CODE)
 static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb
     , struct net_device *sb_dev
     #if (LINUX_VERSION_CODE < KERNEL_VERSION(5,2,0))

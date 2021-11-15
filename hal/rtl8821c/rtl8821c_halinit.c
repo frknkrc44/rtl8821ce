@@ -68,6 +68,7 @@ u32 rtl8821c_power_on(PADAPTER adapter)
 	u8 bMacPwrCtrlOn;
 	int err = 0;
 	u8 ret = _SUCCESS;
+	u8 ips = _FALSE;
 
 
 	d = adapter_to_dvobj(adapter);

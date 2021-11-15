@@ -17,7 +17,10 @@
 #ifdef __KERNEL__
 	#include <linux/if_arp.h>
 	#include <net/ip.h>
-	#include <net/ipx.h>
+	#include <linux/version.h>
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
+		#include <net/ipx.h>
+	#endif
 	#include <linux/atalk.h>
 	#include <linux/udp.h>
 	#include <linux/if_pppox.h>
@@ -57,7 +60,9 @@
 
 #define NAT25_IPV4		01
 #define NAT25_IPV6		02
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 #define NAT25_IPX		03
+#endif
 #define NAT25_APPLE		04
 #define NAT25_PPPOE		05
 
@@ -168,7 +173,7 @@ static __inline__ void __nat25_generate_ipv4_network_addr(unsigned char *network
 	memcpy(networkAddr + 7, (unsigned char *)ipAddr, 4);
 }
 
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 static __inline__ void __nat25_generate_ipx_network_addr_with_node(unsigned char *networkAddr,
 		unsigned int *ipxNetAddr, unsigned char *ipxNodeAddr)
 {
@@ -179,7 +184,6 @@ static __inline__ void __nat25_generate_ipx_network_addr_with_node(unsigned char
 	memcpy(networkAddr + 5, ipxNodeAddr, 6);
 }
 
-
 static __inline__ void __nat25_generate_ipx_network_addr_with_socket(unsigned char *networkAddr,
 		unsigned int *ipxNetAddr, unsigned short *ipxSocketAddr)
 {
@@ -189,7 +193,7 @@ static __inline__ void __nat25_generate_ipx_network_addr_with_socket(unsigned ch
 	memcpy(networkAddr + 1, (unsigned char *)ipxNetAddr, 4);
 	memcpy(networkAddr + 5, (unsigned char *)ipxSocketAddr, 2);
 }
-
+#endif
 
 static __inline__ void __nat25_generate_apple_network_addr(unsigned char *networkAddr,
 		unsigned short *network, unsigned char *node)
@@ -330,6 +334,7 @@ static __inline__ int __nat25_network_hash(unsigned char *networkAddr)
 		x = networkAddr[7] ^ networkAddr[8] ^ networkAddr[9] ^ networkAddr[10];
 
 		return x & (NAT25_HASH_SIZE - 1);
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 	} else if (networkAddr[0] == NAT25_IPX) {
 		unsigned long x;
 
@@ -337,6 +342,7 @@ static __inline__ int __nat25_network_hash(unsigned char *networkAddr)
 		    networkAddr[6] ^ networkAddr[7] ^ networkAddr[8] ^ networkAddr[9] ^ networkAddr[10];
 
 		return x & (NAT25_HASH_SIZE - 1);
+#endif
 	} else if (networkAddr[0] == NAT25_APPLE) {
 		unsigned long x;
 
@@ -892,15 +898,19 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 	/*---------------------------------------------------*/
 	/*         Handle IPX and Apple Talk frame          */
 	/*---------------------------------------------------*/
+	
 	else if ((protocol == __constant_htons(ETH_P_IPX)) ||
-		 (protocol == __constant_htons(ETH_P_ATALK)) ||
-		 (protocol == __constant_htons(ETH_P_AARP))) {
+		(protocol == __constant_htons(ETH_P_ATALK)) ||
+		 (protocol == __constant_htons(ETH_P_AARP))){	 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 		unsigned char ipx_header[2] = {0xFF, 0xFF};
 		struct ipxhdr	*ipx = NULL;
+#endif
 		struct elapaarp	*ea = NULL;
 		struct ddpehdr	*ddp = NULL;
 		unsigned char *framePtr = skb->data + ETH_HLEN;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 		if (protocol == __constant_htons(ETH_P_IPX)) {
 			RTW_INFO("NAT25: Protocol=IPX (Ethernet II)\n");
 			ipx = (struct ipxhdr *)framePtr;
@@ -910,21 +920,27 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 				ipx = (struct ipxhdr *)framePtr;
 			} else {
 				unsigned char ipx_8022_type =  0xE0;
+#endif
 				unsigned char snap_8022_type = 0xAA;
 
 				if (*framePtr == snap_8022_type) {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 					unsigned char ipx_snap_id[5] = {0x0, 0x0, 0x0, 0x81, 0x37};		/* IPX SNAP ID */
+#endif
 					unsigned char aarp_snap_id[5] = {0x00, 0x00, 0x00, 0x80, 0xF3};	/* Apple Talk AARP SNAP ID */
 					unsigned char ddp_snap_id[5] = {0x08, 0x00, 0x07, 0x80, 0x9B};	/* Apple Talk DDP SNAP ID */
 
 					framePtr += 3;	/* eliminate the 802.2 header */
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 					if (!memcmp(ipx_snap_id, framePtr, 5)) {
 						framePtr += 5;	/* eliminate the SNAP header */
 
 						RTW_INFO("NAT25: Protocol=IPX (Ethernet SNAP)\n");
 						ipx = (struct ipxhdr *)framePtr;
 					} else if (!memcmp(aarp_snap_id, framePtr, 5)) {
+#else 
+					if (!memcmp(aarp_snap_id, framePtr, 5)) {
+#endif
 						framePtr += 5;	/* eliminate the SNAP header */
 
 						ea = (struct elapaarp *)framePtr;
@@ -937,14 +953,22 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 							framePtr[1], framePtr[2], framePtr[3], framePtr[4]);
 						return -1;
 					}
-				} else if (*framePtr == ipx_8022_type) {
+				}
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
+				else if (*framePtr == ipx_8022_type) {
 					framePtr += 3;	/* eliminate the 802.2 header */
 
 					if (!memcmp(ipx_header, framePtr, 2)) {
 						RTW_INFO("NAT25: Protocol=IPX (Ethernet 802.2)\n");
 						ipx = (struct ipxhdr *)framePtr;
-					} else
+					} else {
 						return -1;
+					}
+#else
+				else return -1;
+#endif
+				
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5,15, 0)
 				}
 			}
 		}
@@ -1018,7 +1042,11 @@ int nat25_db_handle(_adapter *priv, struct sk_buff *skb, int method)
 		}
 
 		/*   AARP  */
+
 		else if (ea != NULL) {
+#else
+		if (ea != NULL) {
+#endif
 			/* Sanity check fields. */
 			if (ea->hw_len != ETH_ALEN || ea->pa_len != AARP_PA_ALEN) {
 				DEBUG_WARN("NAT25: Appletalk AARP Sanity check fail!\n");
