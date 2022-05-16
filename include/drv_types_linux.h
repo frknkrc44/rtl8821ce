@@ -18,7 +18,7 @@
 #include <linux/version.h>
 #include <linux/kthread.h>
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 13, 0) && LINUX_VERSION_CODE < KERNEL_VERSION(5, 17, 0)
     #ifdef set_kthread_struct
         #undef set_kthread_struct
     #endif
