@@ -2804,6 +2804,8 @@ static int netdev_vir_if_close(struct net_device *pnetdev)
 	rtw_scan_abort(padapter);
 	rtw_cfg80211_wait_scan_req_empty(padapter, 200);
 	adapter_wdev_data(padapter)->bandroid_scan = _FALSE;
+	if (pnetdev)
+		pnetdev->reg_state = NETREG_REGISTERED;
 #endif
 
 	return 0;
@@ -3383,7 +3385,7 @@ int _netdev_open(struct net_device *pnetdev)
 		rtw_cfg80211_init_wiphy(padapter);
 		rtw_cfg80211_init_wdev_data(padapter);
 		#endif
-		/* rtw_netif_carrier_on(pnetdev); */ /* call this func when rtw_joinbss_event_callback return success */
+		rtw_netif_carrier_on(pnetdev); /* call this func when rtw_joinbss_event_callback return success */
 		rtw_netif_wake_queue(pnetdev);
 
 		#ifdef CONFIG_BR_EXT
@@ -3909,6 +3911,8 @@ static int netdev_close(struct net_device *pnetdev)
 #ifdef CONFIG_IOCTL_CFG80211
 	rtw_cfg80211_wait_scan_req_empty(padapter, 200);
 	adapter_wdev_data(padapter)->bandroid_scan = _FALSE;
+	padapter->rtw_wdev->iftype = NL80211_IFTYPE_STATION;
+	padapter->rtw_wdev->current_bss = NULL;
 	/* padapter->rtw_wdev->iftype = NL80211_IFTYPE_MONITOR; */ /* set this at the end */
 #endif /* CONFIG_IOCTL_CFG80211 */
 

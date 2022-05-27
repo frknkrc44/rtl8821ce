@@ -44,9 +44,13 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, u8 *pBuf, u8 qsel)
 	rtw_hal_get_def_var(padapter, HAL_DEF_TX_PAGE_SIZE, &page_size);
 
 	/* map TX DESC buf_addr (including TX DESC + tx data) */
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0))
 	mapping = pci_map_single(pdev, pBuf,
 			size+TX_WIFI_INFO_SIZE, PCI_DMA_TODEVICE);
-
+#else
+	mapping = dma_map_single(&pdev->dev, pBuf,
+			size+TX_WIFI_INFO_SIZE, DMA_TO_DEVICE);
+#endif
 
 	/* Calculate page size.
 	 * Total buffer length including TX_WIFI_INFO and PacketLen
@@ -56,20 +60,27 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, u8 *pBuf, u8 qsel)
 
 	if (((size + TX_WIFI_INFO_SIZE) % page_size) > 0)
 		page_size_length++;
-
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0))
 	txbd = pci_alloc_consistent(pdev,
 		sizeof(struct tx_buf_desc), &txbd_dma);
-
+#else
+	txbd = dma_alloc_coherent(&pdev->dev,
+		sizeof(struct tx_buf_desc), &txbd_dma, GFP_KERNEL);
+#endif
 	if (!txbd) {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0))
 		pci_unmap_single(pdev, mapping,
 			size + TX_WIFI_INFO_SIZE, PCI_DMA_FROMDEVICE);
-
+#else
+		dma_unmap_single(&pdev->dev, mapping,
+			size + TX_WIFI_INFO_SIZE, DMA_FROM_DEVICE);
+#endif
 		return _FALSE;
 	}
 	if (qsel == HALMAC_TXDESC_QSEL_H2C_CMD) {
 		rtw_write32(padapter, REG_H2CQ_TXBD_DESA_8821C,
 			txbd_dma & DMA_BIT_MASK(32));
-	#ifdef CONFIG_64BIT_DMA	
+	#ifdef CONFIG_64BIT_DMA
 		rtw_write32(padapter, REG_H2CQ_TXBD_DESA_8821C + 4,
 			txbd_dma >> 32);
 	#endif
@@ -80,7 +91,7 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, u8 *pBuf, u8 qsel)
 		/* Set BCN BD Reg */
 		rtw_write32(padapter, REG_BCNQ_TXBD_DESA_8821C,
 			txbd_dma & DMA_BIT_MASK(32));
-	#ifdef CONFIG_64BIT_DMA	
+	#ifdef CONFIG_64BIT_DMA
 		rtw_write32(padapter, REG_BCNQ_TXBD_DESA_8821C + 4,
 			txbd_dma >> 32);
 	#endif
@@ -135,12 +146,15 @@ static u8 pci_write_port_not_xmitframe(void *d,  u32 size, u8 *pBuf, u8 qsel)
 	}
 
 	udelay(100);
-
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0))
 	pci_free_consistent(pdev, sizeof(struct tx_buf_desc), txbd, txbd_dma);
-
 	pci_unmap_single(pdev, mapping,
-			size + TX_WIFI_INFO_SIZE,	 PCI_DMA_FROMDEVICE);
-
+			size + TX_WIFI_INFO_SIZE, PCI_DMA_FROMDEVICE);
+#else
+	dma_free_coherent(&pdev->dev, sizeof(struct tx_buf_desc), txbd, txbd_dma);
+	dma_unmap_single(&pdev->dev, mapping,
+			size + TX_WIFI_INFO_SIZE, DMA_FROM_DEVICE);
+#endif
 	return ret;
 
 }
@@ -270,8 +284,11 @@ static u8 pci_write_data_rsvd_page_xmitframe(void *d, u8 *pBuf, u32 size)
 	#endif
 
 	/*To patch*/
-
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 18, 0))
 	pci_unmap_single(pdev, mapping,	pxmitbuf->len, PCI_DMA_TODEVICE);
+#else
+	dma_unmap_single(&pdev->dev, mapping, pxmitbuf->len, DMA_TO_DEVICE);
+#endif
 
 	return _TRUE;
 }

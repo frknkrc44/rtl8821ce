@@ -809,6 +809,11 @@ u32	rtw_free_stainfo(_adapter *padapter , struct sta_info *psta)
 			pstapriv->sta_aid[psta->cmn.aid - 1] = NULL;
 			psta->cmn.aid = 0;
 		}
+
+		if (psta->cmn.aid > 31) {
+			pr_err("***** psta->aid (%d) out of bounds\n", psta->cmn.aid);
+			return _FAIL;
+		}
 	}
 
 #endif /* CONFIG_NATIVEAP_MLME	 */
