@@ -3912,7 +3912,9 @@ static int netdev_close(struct net_device *pnetdev)
 	rtw_cfg80211_wait_scan_req_empty(padapter, 200);
 	adapter_wdev_data(padapter)->bandroid_scan = _FALSE;
 	padapter->rtw_wdev->iftype = NL80211_IFTYPE_STATION;
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 19, 2)
 	padapter->rtw_wdev->current_bss = NULL;
+	#endif
 	/* padapter->rtw_wdev->iftype = NL80211_IFTYPE_MONITOR; */ /* set this at the end */
 #endif /* CONFIG_IOCTL_CFG80211 */
 
