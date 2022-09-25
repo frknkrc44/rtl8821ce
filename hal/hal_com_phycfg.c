@@ -2284,13 +2284,16 @@ PHY_GetTxPowerIndexBase(
 	}
 #ifdef CONFIG_IEEE80211_BAND_5GHZ
 	else {
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 		if (Rate >= MGN_6M)
+#endif
 			txPower = pHalData->Index5G_BW40_Base[RFPath][chnlIdx];
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 		else {
 			RTW_INFO("===>PHY_GetTxPowerIndexBase: INVALID Rate(0x%02x).\n", Rate);
 			goto exit;
 		}
-
+#endif
 		/* OFDM-nTX */
 		if ((MGN_6M <= Rate && Rate <= MGN_54M) && !IS_CCK_RATE(Rate)) {
 			txPower += pHalData->OFDM_5G_Diff[RFPath][RF_1TX];
@@ -2920,12 +2923,12 @@ s8 phy_get_txpwr_lmt_abs(
 		rtw_warn_on(1);
 		goto exit;
 	}
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 	if (Band == BAND_ON_5G  && tlrs == TXPWR_LMT_RS_CCK) {
 		RTW_ERR("5G has no CCK\n");
 		goto exit;
 	}
-
+#endif
 	if (lock)
 		_enter_critical_mutex(&rfctl->txpwr_lmt_mutex, &irqL);
 

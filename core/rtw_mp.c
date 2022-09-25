@@ -2981,8 +2981,11 @@ u8 HwRateToMPTRate(u8 rate)
 		break;
 
 	default:
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 		RTW_INFO("hw_rate_to_m_rate(): Non supported Rate [%x]!!!\n", rate);
+#endif
 		break;
+
 	}
 	return ret_rate;
 }
