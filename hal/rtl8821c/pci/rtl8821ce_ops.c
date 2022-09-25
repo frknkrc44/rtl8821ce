@@ -448,9 +448,13 @@ static s32 rtl8821ce_interrupt(PADAPTER Adapter)
 	// <3> Tx related
 	rtl8821ce_tx_handler(Adapter, pHalData->IntArray, handled);
 
+	// disable TXFOVW warning, because it
+	// spams to dmesg while doing speedtest
 	if (pHalData->IntArray[1] & BIT_TXFOVW) {
 		// if (printk_ratelimit())
+		#if 0
 		RTW_WARN("[TXFOVW]\n");
+		#endif
 		handled[1] |= BIT_TXFOVW;
 	}
 
