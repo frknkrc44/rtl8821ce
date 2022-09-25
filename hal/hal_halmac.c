@@ -3873,6 +3873,8 @@ static u8 _is_fw_read_cmd_down(PADAPTER adapter, u8 msgbox_num)
 			rtw_msleep_os(1);
 	} while ((!read_down) && (retry_cnts--));
 
+	read_down = _TRUE;
+
 	if (_FALSE == read_down)
 		RTW_WARN("%s, reg_1cc(%x), msg_box(%d)...\n", __func__, rtw_read8(adapter, REG_HMETFR), msgbox_num);
 

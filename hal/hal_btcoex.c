@@ -772,12 +772,13 @@ static u8 _btmpoper_cmd(PBTC_COEXIST pBtCoexist, u8 opcode, u8 opcodever, u8 *cm
 
 	_rtw_down_sema(&GLBtcBtMpRptSema);
 	/* GLBtcBtMpRptWait should be _FALSE here*/
-
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(6,0,0)
 	if (GLBtcBtMpRptWiFiOK == _FALSE) {
 		RTW_ERR("%s: Didn't get H2C Rsp Event!\n", __FUNCTION__);
 		ret = BT_STATUS_H2C_TIMTOUT;
 		goto exit;
 	}
+
 	if (GLBtcBtMpRptBTOK == _FALSE) {
 		RTW_DBG("%s: Didn't get BT response!\n", __FUNCTION__);
 		ret = BT_STATUS_H2C_BT_NO_RSP;
@@ -790,6 +791,11 @@ static u8 _btmpoper_cmd(PBTC_COEXIST pBtCoexist, u8 opcode, u8 opcodever, u8 *cm
 		ret = BT_STATUS_C2H_REQNUM_MISMATCH;
 		goto exit;
 	}
+	#else
+	GLBtcBtMpRptWiFiOK = _TRUE;
+	GLBtcBtMpRptBTOK = _TRUE;
+	GLBtcBtMpRptSeq = seq;
+	#endif
 
 	switch (GLBtcBtMpRptStatus) {
 	/* Examine the status reported from C2H */
