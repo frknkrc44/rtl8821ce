@@ -358,6 +358,13 @@ static void rtl8821ce_bcn_handler(PADAPTER Adapter, u32 handled[])
 		tasklet_hi_schedule(bcn_tasklet);
 		handled[0] |= BIT_BCNDMAINT0_MSK;
 	}
+
+	if(pHalData->IntArray[0] & BIT_PSTIMEOUT_MSK) {
+		// do nothing, just set as handled
+		// to avoid Unhandled ISR errors
+		// TODO: Find a method to handle this
+		handled[0] |= BIT_PSTIMEOUT_MSK;
+	}
 }
 
 static void rtl8821ce_rx_handler(PADAPTER Adapter, u32 handled[])
