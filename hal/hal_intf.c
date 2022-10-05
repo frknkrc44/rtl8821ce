@@ -1131,6 +1131,11 @@ static s32 _rtw_hal_macid_sleep(_adapter *adapter, u8 macid, u8 sleep)
 	u32 val32;
 	s32 ret = _FAIL;
 
+	if(sleep) {
+		RTW_INFO("Sleep is disabled!\n");
+		return _SUCCESS;
+	}
+
 	if (macid >= macid_ctl->num) {
 		RTW_ERR(ADPT_FMT" %s invalid macid(%u)\n"
 			, ADPT_ARG(adapter), sleep ? "sleep" : "wakeup" , macid);
@@ -1205,6 +1210,11 @@ static s32 _rtw_hal_macid_bmp_sleep(_adapter *adapter, struct macid_bmp *bmp, u8
 	u32 m;
 	u8 mid = 0;
 	u32 val32;
+
+	if(sleep) {
+		RTW_INFO("Sleep is disabled!\n");
+		return _SUCCESS;
+	}
 
 	do {
 		if (mid == 0) {
