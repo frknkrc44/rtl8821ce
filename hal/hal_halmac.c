@@ -616,14 +616,20 @@ static int wait_halmac_event(struct dvobj_priv *d, enum halmac_feature_id id)
 	if (_SUCCESS == ret)
 		return 0;
 
-	/* timeout! We have to reset halmac state */
 	RTW_ERR("%s: Wait id(%d, %s) TIMEOUT! Reset HALMAC state!\n",
-		__FUNCTION__, id, RTW_HALMAC_FEATURE_NAME[id]);
+                __FUNCTION__, id, RTW_HALMAC_FEATURE_NAME[id]);
+
+#if 0
+	/* timeout! We have to reset halmac state */
 	mac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(mac);
 	api->halmac_reset_feature(mac, id);
 
 	return -1;
+#else
+	RTW_ERR("%s: RESET SKIPPED\n", __FUNCTION__);
+	return 0;
+#endif
 }
 
 /*
