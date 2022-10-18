@@ -2530,9 +2530,11 @@ int rtw_change_ifname(_adapter *padapter, const char *ifname)
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(adapter_to_dvobj(padapter)));
 
 	rtw_init_netdev_name(pnetdev, ifname);
-
+	#if LINUX_VERSION_CODE < KERNEL_VERSION(5,17,0)
 	_rtw_memcpy(pnetdev->dev_addr, adapter_mac_addr(padapter), ETH_ALEN);
-
+	#else
+	eth_hw_addr_set(pnetdev, adapter_mac_addr(padapter));
+	#endif
 	if (rtnl_lock_needed)
 		ret = register_netdev(pnetdev);
 	else
@@ -2654,7 +2656,9 @@ u64 rtw_division64(u64 x, u64 y)
 inline u32 rtw_random32(void)
 {
 #ifdef PLATFORM_LINUX
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 1, 0))
+	return get_random_u32();
+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
 	return prandom_u32();
 #elif (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 6, 18))
 	u32 random_int;
