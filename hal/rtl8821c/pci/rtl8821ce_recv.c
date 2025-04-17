@@ -485,7 +485,7 @@ void rtl8821ce_free_rxbd_ring(_adapter *padapter)
 					 PCI_DMA_FROMDEVICE);
 #else
 			dma_unmap_single(&pdev->dev,
-					((dma_addr_t *) skb->cb),
+					*((dma_addr_t *) skb->cb),
 					r_priv->rxbuffersize,
 					DMA_FROM_DEVICE);
 #endif
